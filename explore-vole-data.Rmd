@@ -8,6 +8,8 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(rvest)
+library(httr)
 ```
 
 
@@ -20,41 +22,42 @@ The aim of this R project is to bring the data on water vole evolution, collecte
 
 The first stage of this work is reading in the data used during my thesis and tidying / exploring it.
 
+I'm using the supplementary data submitted as part of the these and available online at [@Ruddy:2011].
+
+
+
 ```{r}
-load(file = "./data/ages.RData")
-load(file = "./data/enamel_microns.RData")
-load(file = "./data/enamel_models_phdcor.RData")
-load(file = "./data/LocAges_phdcor.RData")
+
+
 ```
 
 
-```{r}
-glimpse(LocAges4.et)
-str(LocAges9.shapes)
-str(LocAges9.et)
-```
 
+Enamel 
 
 ```{r}
-glimpse(et_micron)
-```
 
+et <- 
 
-```{r}
 glimpse(et.models.gt4.phdcor)
-```
 
-
-```{r}
-glimpse(LocAges.phdcor)
-
-assemblage <- LocAges.phdcor
-
-assemblage %>% group_by(Lineage) %>%
+et.models.gt4.phdcor %>% group_by(OTU) %>%
   summarise(count = n())
 
-
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -62,5 +65,6 @@ assemblage %>% group_by(Lineage) %>%
 ## References
 
 
+Ruddy, M (2011) The Western Palaeartic evolution of the water vole, *Arvicola*. https://pure.royalholloway.ac.uk/portal/en/publications/the-western-palaearctic-evolution-of-the-water-vole-arvicola(2153a197-5a98-472c-8645-68e878517829).html
 
 

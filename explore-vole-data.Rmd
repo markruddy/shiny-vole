@@ -7,9 +7,60 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
 ```
+
+
+## Introduction
+
+The aim of this R project is to bring the data on water vole evolution, collected during my PhD [@Ruddy:2011], to life again through the use of `tidyverse` and `shiny`. These weren't available during my PhD and I'm interested in seeing how they can be applied to palaeontological data.
+
+
+## Datasets
+
+The first stage of this work is reading in the data used during my thesis and tidying / exploring it.
 
 ```{r}
+load(file = "./data/ages.RData")
+load(file = "./data/enamel_microns.RData")
+load(file = "./data/enamel_models_phdcor.RData")
+load(file = "./data/LocAges_phdcor.RData")
+```
+
+
+```{r}
+glimpse(LocAges4.et)
+str(LocAges9.shapes)
+str(LocAges9.et)
+```
+
+
+```{r}
+glimpse(et_micron)
+```
+
+
+```{r}
+glimpse(et.models.gt4.phdcor)
+```
+
+
+```{r}
+glimpse(LocAges.phdcor)
+
+assemblage <- LocAges.phdcor
+
+assemblage %>% group_by(Lineage) %>%
+  summarise(count = n())
+
 
 ```
+
+
+
+
+## References
+
+
+
 

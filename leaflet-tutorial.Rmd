@@ -1,0 +1,94 @@
+---
+title: "leaflet-tutorial"
+author: "Mark Ruddy"
+date: "24 April 2017"
+output: html_document
+---
+
+This notebook tests the use of the [Leaflet Javascript library](http://leafletjs.com/) for mobile-friendly mapping. The meat of the code is taken from Simon Goring's [Introduction to Leaflet and Shiny in R](https://github.com/SimonGoring/ShinyLeaflet-tutorial/blob/master/Shiny-leaflet-tutorial.Rmd).
+
+In R Leaflet can be used via the package `leaflet` (wrappers also exist for python). 
+
+```{r}
+# install.packages("leaflet")
+library(leaflet)
+```
+
+A simple map. 
+```{r}
+
+map <- leaflet(width = 400, height = 400) %>% 
+         addTiles() %>% # Default is OpenStreetMap
+         addMarkers(lng = -0.1340, # Bloomsbury, London
+                    lat = 51.5246, 
+                    popup = "You are here.")
+
+map
+```
+
+
+Different tile-sets.
+
+```{r}
+maptypes <- c("MapQuestOpen.Aerial",
+               "Stamen.TerrainBackground",
+               "Esri.WorldImagery",
+               "OpenStreetMap",
+               "Stamen.Watercolor",
+               "OpenTopoMap")
+
+# Change the index to see what the different tile-sets look like:
+# Now we're into the magrittr formatting.  We're using "Provider" tiles here,
+# not the default (OpenStreetMap) Tiles:
+
+map <- leaflet() %>% 
+  addProviderTiles(maptypes[2])
+
+map
+```
+
+Stack provider tiles.
+```{r}
+map <- leaflet(width = 400, height = 400) %>% 
+         addProviderTiles("Esri.WorldImagery") %>%
+         addProviderTiles("OpenWeatherMap.Clouds") %>%
+         addMarkers(lng = -0.1340, # Bloomsbury, London
+                    lat = 51.5246, 
+                    popup = "You are here.")
+
+map
+```
+
+Marker types.
+```{r}
+map <- leaflet(width = 800, height = 400) %>% 
+         addProviderTiles("OpenStreetMap.BlackAndWhite") %>%
+         addMarkers(lng = -0.1340, # Bloomsbury, London
+                    lat = 51.5246, 
+                    popup = "You are here.",
+                    options = markerOptions(draggable = TRUE, riseOnHover = TRUE)) %>%
+        addCircleMarkers(lng = -0.1390, # Bloomsbury, London
+                    lat = 51.5286, 
+                    popup = "A different place.",
+                    fillColor = "red",
+                    opacity = 1) %>%
+        setView(lng = -0.1350,
+               lat = 51.5266,
+               zoom = 15)
+map
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

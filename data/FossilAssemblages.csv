@@ -1,0 +1,68 @@
+"","MapID","Assemblage","Country","Min age","Max age","Archives","n"
+"1","Abz","Abzac","France ",12900,14700,"LEMP",24
+"2","Bal","Balla","Hungary",14700,15180,"HIGB",12
+"3","Bdn","Biedensteg II","Germany ",29000,57000,"SFIF",12
+"4","BSB","Burgtonna South Black-earth","Germany ",71000,116000,"SFIW",36
+"5","B4b","Boxgrove 4b","England",478000,621000,"NHML",27
+"6","B4c","Boxgrove 4c","England",478000,621000,"NHML",33
+"7","BPt","Bridged Pot inner slope","England",0,11650,"NHML",16
+"8","Brl","Brillenhohle IV","Germany ",12900,14700,"SFIF",19
+"9","Bsk","Bisnik 12","Poland",106000,132000,"UNW",15
+"10","BTg","Bolshoi Tiganye","Russia",9200,10300,"MIPA",31
+"11","CCIV","Clacton Channel IV","England",116000,132000,"DBC",22
+"12","CGr","Cudmore Grove `Detrital mud'","England",279000,337000,"NHML",205
+"13","Chg","Chigirin","Ukraine",374000,424000,"MIGG",44
+"14","Crb","Courbet","France ",14100,14700,"NHML",53
+"15","DNg","Donskaya Negatchevka 9","Russia",374000,424000,"MIPA",19
+"16","DSC","Dzerava skala Cave","Slovak Republic",26480,27880,"HIGB",34
+"17","DvB","Divje babe I Facies A","Slovenia",29000,57000,"SLOV",7
+"18","FiK","Fuchsloch im Krockstein","Germany ",11270,13120,"MFNB",26
+"19","FUt","Fortuna utca 16-18/2","Hungary",374000,621000,"HIGB",23
+"20","GBN","Grotta del Broion, Sala Grande N","Italy ",45000,116000,"UNFE",36
+"21","GBQ5","Grotta del Broion, Sala Grande Q5","Italy ",45000,116000,"UNFE",34
+"22","GBQ4","Grotta del Broion, Sala Grande Q4","Italy ",45000,116000,"UNFE",27
+"23","GBR","Grotta del Broion, Sala Grande R1","Italy ",45000,116000,"UNFE",42
+"24","Gun","Gunki II","Ukraine",374000,424000,"MNHK & MIGG",23
+"25","Hun","Hundsheim","Austria",478000,621000,"IPUW",47
+"26","Hvg","Horvolgy","Hungary",191000,337000,"NHMH",13
+"27","Ho8","Horvati-lik 8","Hungary",71000,116000,"HIGB",29
+"28","Ho9a","Horvati-lik 9a","Hungary",71000,116000,"HIGB",35
+"29","Ho13","Horvati-lik 13","Hungary",71000,116000,"HIGB",22
+"30","IFs","Ightham Fissures","England",9510,28230,"NHML",41
+"31","IKo","Ilovayski Kordon","Russia",478000,621000,"MIPA",28
+"32","Kar","Kartstein","Germany ",6000,12900,"SFIF",16
+"33","KGr","Kozi Grzbiet 2","Poland",478000,712000,"ISEK",49
+"34","KLb","Kalman Lambrecht IV","Hungary",57000,116000,"NHMH",12
+"35","Kom","Komarowa D","Poland",29000,44000,"ISEK",18
+"36","Kor","Korotoyak-4","Russia",478000,621000,"MIPA",27
+"37","Kuz","Kuznetsovka Bed 3","Russia",478000,621000,"MIPA",101
+"38","Mdz","Medzhybozh-2","Ukraine",374000,424000,"MNHK",22
+"39","Mer","Merlin's Cave","England",2820,12370,"NHML",110
+"40","Mhm","Miesenheim I C-H","Germany ",478000,621000,"LEID",24
+"41","MJ2","Marie-Jeanne Cave 2","Belgium",1500,11700,"RBIN",19
+"42","MJ4","Marie-Jeanne Cave 4","Belgium",29000,71000,"RBIN",11
+"43","MJ6","Marie-Jeanne Cave 6","Belgium",29000,71000,"RBIN",19
+"44","Msb","Mosbach 2","Germany ",478000,621000,"SFIF & NHRP",121
+"45","Nvk","Novonekrasovka upper","Moldova",116000,132000,"MIGG",17
+"46","OEy","Ossom's Eyrie Cave","England",1000,1700,"MUM",49
+"47","Pil","Pilisszanto","Hungary",16580,16900,"HIGB",44
+"48","Poe","Poeymau BS","France ",11320,11880,"LEMP",19
+"49","Psd","Pisede IV&V","Germany ",2500,3200,"MFNB",36
+"50","Psd","Pisede III","Germany ",3200,3360,"MFNB",31
+"51","Psk","Pesko brick red strata","Hungary",20000,25000,"HIGB",47
+"52","RDT","Rotbav-Dealul Tiganilor Clay-A","Romania",478000,621000,"ISER",32
+"53","Rg3","Regourdou 3","France ",29000,57000,"LEMP",13
+"54","Rg5","Regourdou 5","France ",57000,106000,"LEMP",21
+"55","Rg7","Regourdou 7","France ",57000,106000,"LEMP",26
+"56","RSb","Rybnaya Sloboda","Russia",374000,424000,"MIGG",23
+"57","Sch","Schoningen 13-II-4","Germany ",279000,424000,"LEID",33
+"58","TdF","Trou du Frontal 1er niveau ossifere","Belgium",10490,11010,"RBIN",13
+"59","Ton","Tonchesberg II B","Germany ",116000,132000,"LEID",23
+"60","Tor","Tornewton Cave Red Cave Earth","England",25114,132000,"NHML",19
+"61","Vld","Vladimirovka 2","Russia",374000,424000,"MIPA",33
+"62","VnE","Vindija E","Croatia",18500,27000,"CRIQ",26
+"63","VnG","Vindija G","Croatia",27000,42000,"CRIQ",45
+"64","WLw","Wigber Low 26","England",2500,4000,"SCM",56
+"65","WRF","West Runton Freshwater Bed","England",563000,780000,"NHML",47
+"67","W11","Westbury 11","England",478000,621000,"NHML",16
+"68","W14","Westbury 14","England",478000,621000,"NHML",38

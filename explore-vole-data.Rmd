@@ -144,19 +144,27 @@ et <- et.u.tidy %>%
   select(-OTUID, -OTU, -CSize, -ImageID) %>%
   inner_join(et.c.tidy, by = c("ID" = "ID", "wall" = "wall"))
   
-# rm(list = ls(pattern = "et.+|dups"))
+rm(list = ls(pattern = "et.+|dups"))
 ```
 
 
 Re-order columns for convenience
 ```{r}
-et %>%
+et <- et %>%
   select(ID, ImageID, OTUID, OTU, CSize, wall, raw_thick, allo_thick)
-
 ```
 
+Round 'allo_thick' values to 2 sf.
 
+```{r}
+et$allo_thick <- round(et$allo_thick)
+```
 
+Tidy data export
+
+```{r}
+write_csv(x = et, path = "./data/enamel_thickness.csv", col_names = TRUE)
+```
 
 
 

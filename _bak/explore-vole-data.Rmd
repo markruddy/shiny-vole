@@ -27,7 +27,6 @@ I'm using the supplementary data submitted as part of the these and available on
 Read in.
 
 ```{r read_enamel, message=FALSE}
-
 # Raw enamel thickness measurements in microns
 et.u <- read_csv(file = "./data/SDQ_unmodified_individual.csv", col_names = TRUE)
 

@@ -10,24 +10,21 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 ```
 
-
 ## Introduction
 
 The aim of this R project is to bring the data on water vole evolution, collected during my PhD [@Ruddy:2011], to life again through the use of `tidyverse` and `shiny`. These weren't available during my PhD and I'm interested in seeing how they can be applied to palaeontological data.
-
-
-## Datasets
 
 The first stage of this work is reading in the data used during my thesis and tidying / exploring it.
 
 I'm using the supplementary data submitted as part of the these and available online at [@Ruddy:2011].
 
 
-### Enamel thickness
+## Enamel thickness
 
 Read in.
 
 ```{r read_enamel, message=FALSE}
+
 # Raw enamel thickness measurements in microns
 et.u <- read_csv(file = "./data/SDQ_unmodified_individual.csv", col_names = TRUE)
 
@@ -160,19 +157,182 @@ Round 'allo_thick' values to 2 sf.
 et$allo_thick <- round(et$allo_thick)
 ```
 
+### Ammendments
+
+OTU names for correction
+```{r}
+et <- et %>% 
+  mutate(OTU = if_else(OTU == 'Pesko "brick red" strata', "Pesko brick red strata", OTU)) %>%
+  mutate(OTU = if_else(OTU == 'Trou du Frontal', "Trou du Frontal 1er niveau ossifere", OTU)) %>%
+  mutate(OTU = if_else(OTU == 'Miesenheim I', "Miesenheim I C-H", OTU)) %>%
+  mutate(OTU = if_else(OTU == 'Kuznetsovka', "Kuznetsovka Bed 3", OTU)) %>%
+  mutate(OTU = if_else(OTU == 'Donskaya Negatchevka', "Donskaya Negatchevka 9", OTU)) %>%
+  mutate(OTU = if_else(OTU == 'Cudmore Grove', "Cudmore Grove 'Detrital mud'", OTU))
+
+  
+  
+  
+```
+
 Tidy data export
 
 ```{r}
 write_csv(x = et, path = "./data/enamel_thickness.csv", col_names = TRUE)
 ```
 
+## Sites
+
+
+Read in.
+
+```{r read_sites, message=FALSE}
+
+# Fossil and modern sites
+fossil <- read_csv(file = "./data/FossilLocalities.csv", col_names = TRUE)
+modern <- read_csv(file = "./data/RecentLocalities.csv", col_names = TRUE)
+fossil.asmb <- read_csv(file = "./data/FossilAssemblages.csv", col_names = TRUE)
+```
+
+### Ammendments
+
+Some corrections to entries in the dfs. 
+
+Two missing archive values that should be NHML
+```{r}
+modern <- modern %>% mutate(Archives = if_else(Locality == "Welsh Borders", "NHML", Archives)) %>%
+  mutate(Archives = if_else(Locality == "Central Scotland", "NHML", Archives))
+```
+
+Fossil assemblage name
+```{r}
+fossil.asmb <- fossil.asmb %>% 
+  mutate(Assemblage = if_else(Assemblage == "Vindija E", "Vindija E-F", Assemblage)) %>% 
+  mutate(Assemblage = if_else(Assemblage == "Tonchesberg II B", "Tonchesburg II 11-13", Assemblage)) %>%
+  mutate(Assemblage = if_else(Assemblage == "Cudmore Grove `Detrital mud'", "Cudmore Grove 'Detrital mud'", Assemblage))
+  
+  
+```
+
+
+### Names and coordinates
+
+Modern sites have no assemblage name or age and fossil assemblages have no coordinates. These are needed for querying. Need to combine elements of different tables to rectify this.
+
+Make sites df by combining fossil assemblages and modern sites. Add age columns to modern sites, then adding fossil assemblage long/lats and site names to fuzzy matching site name to assemblage name.
+
+```{r}
+
+# Add Min_age and Max_age to modern
+modern$Min_age <- 0
+modern$Max_age <- 0
+
+# Change age col names in fossil assemblage
+fossil.asmb <- fossil.asmb %>% rename(Min_age = `Min age`, Max_age = `Max age`)
+
+# Add lat/long columns to fossil assemblage
+fossil.asmb$Latitude <- NA
+fossil.asmb$Longitude <- NA
+
+# Drop n columns
+modern <- modern %>% select(-n)
+fossil.asmb <- fossil.asmb %>% select(-n)
+
+# Combine
+sites <- bind_rows(modern, fossil.asmb)
+
+# Map modern Locality to Assemblage
+sites <- sites %>% mutate(Assemblage = if_else(is.na(Assemblage), Locality, Assemblage))
+
+# Change ages from years to thousands of years 
+
+sites <- sites %>% 
+  mutate(Min_age = round(.$Min_age * 10^-3, digits = 2)) %>%
+  mutate(Max_age = round(.$Max_age * 10^-3, digits = 2))
+  
+# rm(modern, fossil)
+
+```
 
 
 
+Now do fuzzy join between assemblage name and fossil site name to add site name to assemblage df
+```{r}
+# install.packages("fuzzyjoin")
+library(fuzzyjoin)
+
+sites.test <- sites %>% 
+  stringdist_full_join(fossil, by = c("Assemblage" = "Locality"), method = "lcs", max_dist = 4, distance_col = "dist")
+
+rm(sites.test)
+```
+
+Best performing fuzzy match is not great. Let's try match based on truncated site name/assemblage name then update based on that match.
 
 
+```{r}
+library(stringr)
+
+# Create joining columns in both dfs. Create common key.
+sites.match <- sites %>% mutate(siteID = str_trunc(Assemblage, width = 5, side = "right", ellipsis = ""))
+fossil.match <- fossil %>% mutate(siteID = str_trunc(Locality, width = 5, side = "right", ellipsis = ""))
+# Sub-select columns of interest from fossil df
+fossil.match <- fossil.match %>% select(Locality, siteID, Longitude, Latitude)
+
+# Join sites and fossil on new siteID
+sites.match <- sites.match %>% full_join(fossil.match, by = c("siteID" = "siteID"))
+
+# Update Locality.x, Long....x and Lat....x from .y columns
+sites.match <- sites.match %>% mutate(Locality.x = ifelse(is.na(Locality.x), Locality.y, Locality.x)) %>%
+  mutate(Longitude.x = if_else(is.na(Longitude.x), Longitude.y, Longitude.x)) %>%
+  mutate(Latitude.x = if_else(is.na(Latitude.x), Latitude.y, Latitude.x)) %>%
+  select(-siteID, -Locality.y, -Longitude.y, -Latitude.y) %>%
+  rename(Locality = Locality.x, Latitude = Latitude.x, Longitude = Longitude.x)
+
+sites <- sites.match
+
+```
+
+Drop some Assemblages not present in et table and drop X1 column
+```{r}
+sites <- sites %>% 
+  filter(Assemblage != "Regourdou 3") %>%
+  filter(Assemblage != "Komarowa D") %>%
+  filter(Assemblage != "Kalman Lambrecht IV") %>%
+  filter(Assemblage != "Ightham Fissures") %>%
+  filter(Assemblage != "Horvolgy") %>%
+  filter(Assemblage != "Divje babe I Facies A") %>%
+  filter(Assemblage != "Bisnik 12") %>%
+  filter(Assemblage != "Brillenhohle IV") %>%
+  filter(Assemblage != "Bridged Pot inner slope") %>%
+  filter(Assemblage != "Biedensteg II") %>%
+  filter(Assemblage != "Balla") %>%
+  filter(Assemblage != "St. Bertrand de Comminge") %>%
+  filter(Assemblage != "Ormozu") %>%
+  filter(Assemblage != "Huesca") %>%
+  filter(Assemblage != "Court St Etienne") %>%
+  filter(Assemblage != "Casian") %>%
+  select(-X1)
+```
 
 
+```{r}
+# Clean up
+
+rm(sites.match, fossil, fossil.asmb, fossil.match, modern)
+
+```
+
+Test join between et and sites dfs. Should be no records missing from join.
+```{r}
+sites.test <- sites %>% anti_join(et, by = c("Assemblage" = "OTU"))
+rm(sites.test)
+```
+
+Tidy data export
+
+```{r}
+write_csv(x = sites, path = "./data/enamel_sites.csv", col_names = TRUE)
+```
 
 
 

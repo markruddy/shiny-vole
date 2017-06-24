@@ -48,8 +48,11 @@ dim(et.u); dim(et.c)
 # Drop common columns and join
 et <- et.u %>%
   select(-ID, -OTUID, -OTU, -CSize) %>%
-  inner_join(et.c, by = "ImageID")
-
+  inner_join(et.c, by = "ImageID") %>%
+  rename_at(vars(ends_with(".x")), funs(sub(".x", "_raw", .))) %>%
+  rename_at(vars(ends_with(".y")), funs(sub(".y", "_cor", .))) %>%
+  select(-starts_with("SDQ"))
+  
 glimpse(et)
 ```
 
@@ -112,34 +115,26 @@ Tidy datasets
 # Need to define separate variables for raw and corrected measurements
 glimpse(et.u.clean)
 
-et.u.tidy <- et.u.clean %>% 
-  gather(key = wall, value = raw_thick, B1a:L4p) %>%
+et.u.rename <- et.u.clean %>% 
+  rename_at(vars(grep("^B|^L|^P", names(.))), funs(str_c(., sep = "", "_raw"))) %>%
   select(-SDQ7i)
 
-et.c.tidy <- et.c.clean %>% 
-  gather(key = wall, value = allo_thick, B1a:L4p) %>%
+et.c.rename <- et.c.clean %>% 
+  rename_at(vars(grep("^B|^L|^P", names(.))), funs(str_c(., sep = "", "_cor"))) %>%
   select(-SDQ7i)
 
 ```
 
-Join tidy datasets
+Join raw and corrected datasets
 
 ```{r}
-et.u.tidy; et.c.tidy
-
-# Prove to myself that rows are tied together
-et.u.tidy %>%
-  select(-OTUID, -OTU) %>%
-  inner_join(et.c.tidy, by = c("ID" = "ID", "wall" = "wall")) %>%
-  mutate(image_diff = ImageID.x - ImageID.y) %>%
-  mutate(csize_diff = CSize.x - CSize.y) %>%
-  filter(csize_diff != 0)
+et.u.rename; et.c.rename
 
 # Joining tables on 'ID' and 'wall'
 
-et <- et.u.tidy %>%
-  select(-OTUID, -OTU, -CSize, -ImageID) %>%
-  inner_join(et.c.tidy, by = c("ID" = "ID", "wall" = "wall"))
+et <- et.u.rename %>%
+  select(-ID, -OTUID, -OTU, -CSize) %>%
+  inner_join(et.c.rename, by = c("ImageID" = "ImageID"))
   
 rm(list = ls(pattern = "et.+|dups"))
 ```
@@ -148,13 +143,16 @@ rm(list = ls(pattern = "et.+|dups"))
 Re-order columns for convenience
 ```{r}
 et <- et %>%
-  select(ID, ImageID, OTUID, OTU, CSize, wall, raw_thick, allo_thick)
+  select(ID, ImageID, OTUID, OTU, CSize, everything()) %>%
+  rename(Assemblage = OTU)
 ```
 
-Round 'allo_thick' values to 2 sf.
+Round *_cor values to 2 sf.
 
 ```{r}
-et$allo_thick <- round(et$allo_thick)
+et %>%
+  mutate_at(............ends_with("_cor") =  )
+  round(et$allo_thick)
 ```
 
 ### Ammendments
@@ -162,19 +160,15 @@ et$allo_thick <- round(et$allo_thick)
 OTU names for correction
 ```{r}
 et <- et %>% 
-  mutate(OTU = if_else(OTU == 'Pesko "brick red" strata', "Pesko brick red strata", OTU)) %>%
-  mutate(OTU = if_else(OTU == 'Trou du Frontal', "Trou du Frontal 1er niveau ossifere", OTU)) %>%
-  mutate(OTU = if_else(OTU == 'Miesenheim I', "Miesenheim I C-H", OTU)) %>%
-  mutate(OTU = if_else(OTU == 'Kuznetsovka', "Kuznetsovka Bed 3", OTU)) %>%
-  mutate(OTU = if_else(OTU == 'Donskaya Negatchevka', "Donskaya Negatchevka 9", OTU)) %>%
-  mutate(OTU = if_else(OTU == 'Cudmore Grove', "Cudmore Grove 'Detrital mud'", OTU))
-
-  
-  
-  
+  mutate(Assemblage = if_else(Assemblage == 'Pesko "brick red" strata', "Pesko brick red strata", Assemblage)) %>%
+  mutate(Assemblage = if_else(Assemblage == 'Trou du Frontal', "Trou du Frontal 1er niveau ossifere", Assemblage)) %>%
+  mutate(Assemblage = if_else(Assemblage == 'Miesenheim I', "Miesenheim I C-H", Assemblage)) %>%
+  mutate(Assemblage = if_else(Assemblage == 'Kuznetsovka', "Kuznetsovka Bed 3", Assemblage)) %>%
+  mutate(Assemblage = if_else(Assemblage == 'Donskaya Negatchevka', "Donskaya Negatchevka 9", Assemblage)) %>%
+  mutate(Assemblage = if_else(Assemblage == 'Cudmore Grove', "Cudmore Grove 'Detrital mud'", Assemblage))
 ```
 
-Tidy data export
+Data export
 
 ```{r}
 write_csv(x = et, path = "./data/enamel_thickness.csv", col_names = TRUE)
@@ -325,7 +319,7 @@ rm(sites.match, fossil, fossil.asmb, fossil.match, modern)
 Test join between et and sites dfs. Should be no records missing from join.
 ```{r}
 sites.test <- sites %>% anti_join(et, by = c("Assemblage" = "OTU"))
-rm(sites.test)
+# rm(sites.test)
 ```
 
 Tidy data export

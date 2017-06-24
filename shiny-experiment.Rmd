@@ -127,13 +127,18 @@ min <- 30
 max <- 100
 
 sites_selection <- sites %>%
-  filter(Min_age > min | Max_age > min) %>% filter(Max_age < max | Min_age < max) %>%
+  filter(Min_age > min | Max_age > min) %>% 
+  filter(Max_age < max | Min_age < max) %>%
   select(Locality, Latitude, Longitude) %>%
   distinct(Locality, Latitude, Longitude)
 
 sdq <- sites %>%
-  filter(Min_age > min | Max_age > min) %>% filter(Max_age < max | Min_age < max) %>%
-  inner_join(y = et, by = c(""))
+  filter(Min_age > min | Max_age > min) %>% 
+  filter(Max_age < max | Min_age < max) %>%
+  inner_join(y = et, by = c("Assemblage" = "OTU")) %>%
+  group_by(ImageID) %>%
+  mutate()
+  
   
 ```
 

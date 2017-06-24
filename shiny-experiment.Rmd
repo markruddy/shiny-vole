@@ -47,6 +47,7 @@ Now map in shiny.
 library(shiny)
 library(leaflet)
 library(dplyr)
+
 # library(htmltools)
 
 # Data
@@ -54,49 +55,59 @@ sites_grouped <- sites %>%
   select(Locality, Latitude, Longitude) %>%
   distinct(Locality, Latitude, Longitude)
 
+# Settings
+radius <- 5
+weight <- 1
+fillOpacity <- 0.6
+
 # ui
 ui <- fluidPage(
   sliderInput(inputId = "time",
               label = "Thousands of years Before Present:",
-              min = 0, max = 800, value = c(0, 800), step = 5), # 2 values for a range slider
-  leafletOutput(outputId = "MapPlot1")#), width = "100%", height = "100%")
+              min = 0, max = 800, value = c(0, 800), step = 2), # 2 values for a range slider
+  leafletOutput(outputId = "Map")#), width = "100%", height = "100%")
 )
 
 # server
 server <- function(input, output) {
   
   # Leaflet map
-  output$MapPlot1 <- renderLeaflet({
+  output$Map <- renderLeaflet({
     leaflet() %>%
     addProviderTiles("CartoDB.Positron") %>% 
-    setView(lng = 15, lat = 55, zoom = 3) %>%
+    setView(lng = 12, lat = 52, zoom = 3) %>%
     addCircleMarkers(data = sites_grouped, 
                      lat = ~Latitude, lng = ~Longitude,
-                     radius = 4,
-                     weight = 1,
-                     fillOpacity = 0.6,
+                     radius = radius,
+                     weight = weight,
+                     fillOpacity = fillOpacity,
                      popup = ~as.character(Locality))
-
   })
   
   # Slider inputs
-  observeEvent({
+  observe({
     min_age <- input$time[[1]]
     max_age <- input$time[[2]]
     
     sites_selection <- sites %>% 
       filter(Min_age >= min_age | Max_age >= min_age) %>% 
-      filter(Max_age <= max_age | Min_age <= max_age) 
+      filter(Max_age <= max_age | Min_age <= max_age) %>%
+      select(Locality, Latitude, Longitude) %>%
+      distinct(Locality, Latitude, Longitude)
 
-    leafletProxy("MapPlot1") %>% clearMarkers() %>%
-        addCircleMarkers(lng = sites_selection$Longitude,
-          lat = sites_selection$Latitude,
-          popup = as.character(sites_selection$Locality)
-        )
+    leafletProxy("Map") %>% 
+      clearMarkers() %>% 
+      addCircleMarkers(data = sites_selection,
+                       lng = ~Longitude, 
+                       lat = ~Latitude,
+                       radius = radius,
+                       weight = weight,
+                       fillOpacity = fillOpacity,
+                       popup = ~as.character(Locality)
+                       )
     
-# ?
-# Need to query sites within age range
-# And then display each assemblage present, even when >1 assemblage per site
+    
+    
    })
   
 }
@@ -105,13 +116,25 @@ shinyApp(ui = ui, server = server)
 ```
 
 
+## Test plotting
+
+### SDQ
+
+Vertical box plot
+
 ```{r}
 min <- 30
 max <- 100
 
-sites_selection <- sites %>% 
-      filter(Min_age > min | Max_age > min) %>% filter(Max_age < max | Min_age < max) %>%
-      inner_join(sites_grouped, by = "Locality")
+sites_selection <- sites %>%
+  filter(Min_age > min | Max_age > min) %>% filter(Max_age < max | Min_age < max) %>%
+  select(Locality, Latitude, Longitude) %>%
+  distinct(Locality, Latitude, Longitude)
+
+sdq <- sites %>%
+  filter(Min_age > min | Max_age > min) %>% filter(Max_age < max | Min_age < max) %>%
+  inner_join(y = et, by = c(""))
+  
 ```
 
 

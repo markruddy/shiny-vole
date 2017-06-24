@@ -1,0 +1,201 @@
+---
+title: "Explore vole data"
+author: "Mark Ruddy"
+date: "2017-05-23"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+## Introduction
+
+The aim of this R project is to bring the data on water vole evolution, collected during my PhD [@Ruddy:2011], to life again through the use of `tidyverse` and `shiny`. These weren't available during my PhD and I'm interested in seeing how they can be applied to palaeontological data.
+
+
+## Datasets
+
+The first stage of this work is reading in the data used during my thesis and tidying / exploring it.
+
+I'm using the supplementary data submitted as part of the these and available online at [@Ruddy:2011].
+
+
+### Enamel thickness
+
+Read in.
+
+```{r read_enamel, message=FALSE}
+# Raw enamel thickness measurements in microns
+et.u <- read_csv(file = "./data/SDQ_unmodified_individual.csv", col_names = TRUE)
+
+# Allometrically corrected enamel thickness measurements in microns
+et.c <- read_csv(file = "./data/SDQ_corrected_individual.csv", col_names = TRUE)
+
+et.u <- et.u %>%
+  rename(ID = X1)
+
+et.c <- et.c %>%
+  rename(ID = X1)
+
+# glimpse(et.u)
+```
+
+Join tables of raw and allometrically corrected enamel thicknesses by ImageID
+
+```{r}
+dim(et.u); dim(et.c)
+
+# Drop common columns and join
+et <- et.u %>%
+  select(-ID, -OTUID, -OTU, -CSize) %>%
+  inner_join(et.c, by = "ImageID")
+
+glimpse(et)
+```
+
+There are an extra 14 records in the inner joined table than either on their own. Is this an extra ImageID?
+
+```{r}
+# Check for duplicate ImageIDs
+et.u %>% select(ImageID) %>%
+  group_by(ImageID) %>%
+  summarise(count = n()) %>%
+  filter(count > 1)
+
+
+et.c %>% select(ImageID) %>%
+  group_by(ImageID) %>%
+  summarise(count = n()) %>%
+  filter(count > 1)
+
+```
+The same 7 ImageIDs are duplicated in both tables. Let's investigate them.
+
+```{r}
+et.u %>% group_by(ImageID) %>%
+  summarise(count = n()) %>%
+  filter(count > 1) %>%
+  inner_join(et.u, by = "ImageID") %>%
+  select(-count)
+  
+et.c %>% group_by(ImageID) %>%
+  summarise(count = n()) %>%
+  filter(count > 1) %>%
+  inner_join(et.c, by = "ImageID") %>%
+  select(-count)
+```
+The other variables are duplicated too so we can go ahead and remove one of the duplicates for each ImageID by using ID as a key.
+
+```{r}
+# Using ID (record ID) value as basis for selection
+# Select single record from each duplicate
+dups <- et.u %>% group_by(ImageID) %>%
+  summarise(count = n()) %>%
+  filter(count > 1) %>%
+  inner_join(et.u, by = "ImageID") %>%
+  select(ImageID, ID) %>%
+  ungroup(ImageID) %>%
+  group_by(ImageID) %>%
+  top_n(-1, ID)
+
+
+# Drop the dups ID from the original et tables
+
+et.u.clean <- et.u %>% anti_join(dups, by = "ID")
+et.c.clean <- et.c %>% anti_join(dups, by = "ID")
+
+```
+
+Tidy datasets
+
+```{r}
+# Need to define separate variables for raw and corrected measurements
+glimpse(et.u.clean)
+
+et.u.tidy <- et.u.clean %>% 
+  gather(key = wall, value = raw_thick, B1a:L4p) %>%
+  select(-SDQ7i)
+
+et.c.tidy <- et.c.clean %>% 
+  gather(key = wall, value = allo_thick, B1a:L4p) %>%
+  select(-SDQ7i)
+
+```
+
+Join tidy datasets
+
+```{r}
+et.u.tidy; et.c.tidy
+
+# Prove to myself that rows are tied together
+et.u.tidy %>%
+  select(-OTUID, -OTU) %>%
+  inner_join(et.c.tidy, by = c("ID" = "ID", "wall" = "wall")) %>%
+  mutate(image_diff = ImageID.x - ImageID.y) %>%
+  mutate(csize_diff = CSize.x - CSize.y) %>%
+  filter(csize_diff != 0)
+
+# Joining tables on 'ID' and 'wall'
+
+et <- et.u.tidy %>%
+  select(-OTUID, -OTU, -CSize, -ImageID) %>%
+  inner_join(et.c.tidy, by = c("ID" = "ID", "wall" = "wall"))
+  
+rm(list = ls(pattern = "et.+|dups"))
+```
+
+
+Re-order columns for convenience
+```{r}
+et <- et %>%
+  select(ID, ImageID, OTUID, OTU, CSize, wall, raw_thick, allo_thick)
+```
+
+Round 'allo_thick' values to 2 sf.
+
+```{r}
+et$allo_thick <- round(et$allo_thick)
+```
+
+Tidy data export
+
+```{r}
+write_csv(x = et, path = "./data/enamel_thickness.csv", col_names = TRUE)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## References
+
+
+Ruddy, M (2011) The Western Palaeartic evolution of the water vole, *Arvicola*. https://pure.royalholloway.ac.uk/portal/en/publications/the-western-palaearctic-evolution-of-the-water-vole-arvicola(2153a197-5a98-472c-8645-68e878517829).html
+
+
